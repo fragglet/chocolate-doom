@@ -1,4 +1,4 @@
-add_library(heretic STATIC
+add_executable(heretic WIN32
             am_data.h
             am_map.c            am_map.h
             ct_chat.c           ct_chat.h
@@ -51,7 +51,34 @@ add_library(heretic STATIC
             r_things.c
             sb_bar.c
             sounds.c            sounds.h
-            s_sound.c           s_sound.h)
+            s_sound.c           s_sound.h
+)
 
-target_include_directories(heretic PRIVATE "../" "${CMAKE_CURRENT_BINARY_DIR}/../../")
-target_link_libraries(heretic textscreen SDL2::SDL2 SDL2::mixer SDL2::net)
+if(WIN32)
+    target_sources(heretic PRIVATE
+        "${CMAKE_CURRENT_BINARY_DIR}/../resource.rc"
+    )
+endif()
+
+target_link_libraries(heretic PUBLIC
+    gamecommon_dehacked
+)
+
+set_target_properties(heretic PROPERTIES
+    OUTPUT_NAME "${PROGRAM_PREFIX}heretic"
+)
+
+if(MSVC)
+    set_target_properties(heretic PROPERTIES
+        LINK_FLAGS "/MANIFEST:NO"
+    )
+endif()
+
+generate_install_desktop(Heretic)
+generate_install_metainfo(Heretic)
+
+doom_install(TARGETS heretic)
+
+if(DOOM_BUILD_SETUP)
+    create_setup_link(heretic)
+endif()
